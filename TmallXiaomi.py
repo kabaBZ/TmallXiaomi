@@ -3,44 +3,59 @@ import requests
 from lxml import etree
 import re
 import copy
-
-url = 'https://xiaomi.tmall.com/category.htm'
-params = {
-    'spm' : 'a1z10.3-b-s.w15914064-15567552165.2.7a8248feAP04A4',
-    'orderType' : 'hotsell_desc',
-    'viewType' : 'grid',
-    'keyword' : '',
-    'lowPrice' : '',
-    'highPrice' : '',
-    'scene' : 'taobao_shop',
-    'pageNo': '2'
-}
+url = 'https://xiaomi.tmall.com/i/asynSearch.htm'
+def set_params(a):
+    params = {
+        '_ksTS': '1648134407880_133',
+        'mid': 'w-14756119836-0',
+        'wid': '14756119836',
+        'path': '/category.htm',
+        'spm': 'a1z10.5-b-s.w4011-14756119836.54.bb814e025qwZVN',
+        'orderType': 'hotsell_desc',
+        'viewType': 'grid',
+        'scene': 'taobao_shop',
+        'pageNo': a
+    }
+    return params
 headers = {
     'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.46',
-    'cookie' : 'cna=VxSdGq5W9WECAXPNciF8oBw6; sgcookie=E100OAML9wNnJfZ7VZGyBNVRN4SInawW1nfpTCPFeHp1IrIihDlMOdENM9QKNHnzQNQMynPewwSZGbQGCuzaPvH3z+mIHUk2afkmrXnnvIaDbmsBIotfV4x1IZmlIUSBEVDE; t=efe1f56160832f9b26b1131f4f6e5279; uc3=vt3=F8dCvUCV1rgu7k/Er3Q=&nk2=AR7rEKars5hk/w==&id2=UojcjU6y2+VQSw==&lg2=VFC/uZ9ayeYq2g==; tracknick=bzzzz_kaba; lid=bzzzz_kaba; uc4=nk4=0@A7NLpSHVvfKW3Z7DjMYHhqqBz0LN&id4=0@UOBYxUZKAx73vNpi6CS7oc1zwuok; lgc=bzzzz_kaba; enc=pI80SsyGaXghBvrT9b/iXoJMBsdVdQYHPxwce1lUj9/5fwIGH7/3hZOvz5eIFDSDCbdZCtknqc5OQnwbPG3dpQ==; _tb_token_=ee88e07ed3de0; cookie2=123020b79d32ad0402040896211c14ba; _m_h5_tk=e3e4178b89faa1c9f3ac3b85c028c25c_1648138709275; _m_h5_tk_enc=99536afa510637c97331a4f9455dc43b; xlly_s=1; pnm_cku822=; cq=ccp=1; tfstk=clhRBPvqEnxl8vzx7YpmAFZfGtmda_xLcaZh9EbLIOBdAdfRNsAisfKEzLaQbuLA.; l=eB_09h8nLIIQIApCKO5aourza77TiIdb4sPzaNbMiInca1Pf_ZdP6NCnJ5vM8dtjgtCfmetyx5kn5dLHR3jMBDLixLqj4_aEFxvO.; isg=BOTkWNDEWmsNx66n2Fjy1UVAteLWfQjnWARgPf4E_63wqYRzJohHdxlDbQGxcUA_'
 }
-dic = {}
-list = []
-page_text = requests.get(url = url,headers = headers ,params = params).text
+def parse(page_text):
+    dic = {}
+    list = []
+    i = 0
+    num = 1
+    #裁剪响应中前半段无效代码每个商品前会出现的标签,可分段进行正则解析，正则在大规模代码中效率低
+    page_text = page_text.split('<!--  item')
+    page_text.pop(0)
+    #弹出最后6个推荐商品剩余一页共60个,换item不用弹
+    # for i in range(6):
+    #     page_text.pop()
+    #     i += 1
+    # re解析：<img alt=\"【天玑1100 处理器】小米/Redmi Note 10 Pro 5G智能红米手机学生拍照游戏官方旗舰店红米官方旗舰店官网\"
+    #class=\"c-price\">1469.00</span></div>
+    # class=\"sale-num\">40万+</span>
+    #href=\"//detail.tmall.com/item.htm?id=44932380380&rn=ea8fc89d045f285d78fe41708a17beb9&abbucket=5\" ta
+    for i in page_text:
+        dic['num'] = num
+        dic['title'] = re.findall('.*?<img alt=(.*?)" data-ks-lazyl.*?',i)[0].split('\" ')[1].split('\\')[0]
+        dic['price'] = re.findall('.*?.discntPrice:  (.*?)     -->.*?',i)[0]
+        dic['sales_num'] = re.findall('.*?"sale-num(.*?)</span>.*?',i)[0].split('>')[1]
+        dic['product_url'] = re.findall('.*?href=(.*?)" target=.*?',i)[0].split('//')[1].split('\\')[0]
+        num += 1
+        list.append(copy.deepcopy(dic))
+    return list
+
+# page_text = requests.get(url = url,headers = headers ,params = params).text
+# print(page_text)
+# with open('test.html','w',encoding= 'utf-8') as f:
+#     f.write(page_text)
 #开发中获取一次响应后存下来进行本地的数据解析，以防过度访问被封ip
+i = 1
+for i in range(int(input('请输入爬取页数:'))):
+    params = set_params(i)
+    page_text = requests.get(url=url, headers=headers, params=params).text
 # with open('test.html','r',encoding= 'utf-8') as f:
 #     page_text = f.read()
-#裁剪响应中前半段无效代码
-page_text = page_text.split('<li class="item even first">')
-page_text = page_text[1]
-#裁剪响应数据中后半段无效代码（随便挑一个不重复的标签裁剪后取前半段）
-page_text = page_text.split('<div class="panel collection disappear">')
-page_text = page_text[0]
-#<div class="ranking">每个商品前会出现的标签,可分段进行正则解析，正则在大规模代码中效率低，不过天猫只有十个可以分可以不分
-page_text = page_text.split('<div class="ranking">')
-page_text.pop(0)
-print(len(page_text))
-# re解析：title="【老年机备用机优选】小米红米9A 5000mAh大电量屏幕游戏备用老年人手机xiaomi小米官方旗舰店官网正品" href="//
-for i in page_text:
-    dic['title'] = re.findall('.*?title="(.*?)" href=".*?',i)[0]
-    dic['price'] = re.findall('.*?ce">￥<span>(.*?)</span></p>.*?',i)[0]
-    dic['sales_num'] = re.findall('.*?"sale-count">(.*?)</span>笔.*?',i)[0]
-    dic['product_url'] = re.findall('.*?href="//(.*?)" target="_.*?',i)[0]
-    print(dic)
-    list.append(copy.deepcopy(dic))
-print(list)
+# print(page_text)
+    print(parse(page_text))
