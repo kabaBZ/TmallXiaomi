@@ -12,7 +12,8 @@ params = {
     'keyword' : '',
     'lowPrice' : '',
     'highPrice' : '',
-    'scene' : 'taobao_shop'
+    'scene' : 'taobao_shop',
+    'pageNo': '2'
 }
 headers = {
     'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.46',
