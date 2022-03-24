@@ -2,6 +2,7 @@
 import requests
 from lxml import etree
 import re
+import copy
 
 url = 'https://xiaomi.tmall.com/category.htm'
 params = {
@@ -19,10 +20,10 @@ headers = {
 }
 dic = {}
 list = []
-# page_text = requests.get(url = url,headers = headers ,params = params).text
+page_text = requests.get(url = url,headers = headers ,params = params).text
 #开发中获取一次响应后存下来进行本地的数据解析，以防过度访问被封ip
-with open('test.html','r',encoding= 'utf-8') as f:
-    page_text = f.read()
+# with open('test.html','r',encoding= 'utf-8') as f:
+#     page_text = f.read()
 #裁剪响应中前半段无效代码
 page_text = page_text.split('<li class="item even first">')
 page_text = page_text[1]
@@ -40,5 +41,5 @@ for i in page_text:
     dic['sales_num'] = re.findall('.*?"sale-count">(.*?)</span>笔.*?',i)[0]
     dic['product_url'] = re.findall('.*?href="//(.*?)" target="_.*?',i)[0]
     print(dic)
-    list.append(dic)
+    list.append(copy.deepcopy(dic))
 print(list)
