@@ -2,8 +2,10 @@
 import requests
 from lxml import etree
 import re
+import asyncio
 import copy
 import pickle
+import time
 url = 'https://xiaomi.tmall.com/i/asynSearch.htm'
 def set_params(a):
     params = {
@@ -46,29 +48,26 @@ def parse(page_text,x):
         dic['sales_num'] = re.findall('.*?"sale-num(.*?)</span>.*?',i)[0].split('>')[1]
         dic['product_url'] = re.findall('.*?href=(.*?)" target=.*?',i)[0].split('//')[1].split('\\')[0]
         num += 1
-        with open('data.csv', 'a', encoding='utf-8') as f:
-            f.write(str(dic['num']) + ' ' + dic['title'] + ' ' + dic['price'] + ' ' + dic['sales_num'] + ' ' + dic['product_url'] + '\n')
+        print(dic['price'])
+        f.write(str(dic['num']) + ' ' + dic['title'] + ' ' + dic['price'] + ' ' + dic['sales_num'] + ' ' + dic['product_url'] + '\n')
         list.append(copy.deepcopy(dic))
     return list
 
-# page_text = requests.get(url = url,headers = headers ,params = params).text
-# print(page_text)
-# with open('test.html','w',encoding= 'utf-8') as f:
-#     f.write(page_text)
-#开发中获取一次响应后存下来进行本地的数据解析，以防过度访问被封ip
 x = input('请输入爬取页数:')
+start_time = time.time()
+f = open('data.csv', 'a', encoding='utf-8')
 for i in range(int(x)):
     params = set_params(i+1)
     page_text = requests.get(url=url, headers=headers, params=params).text
+    # 开发中获取一次响应后存下来进行本地的数据解析，以防过度访问被封ip
     # with open('test.html','w',encoding= 'utf-8') as f:
     #     f.write(page_text)
     # with open('test.html','r',encoding= 'utf-8') as f:
     #     page_text = f.read()
-    #print(page_text)
     list = parse(page_text,i)
     i += 1
-    # with open('data.csv', 'a', encoding='utf-8') as f:
-    #     pickle.dump(list,f)
     print(list)
-
+f.close()
+total_time = time.time()-start_time
+print('总用时：',total_time)
 
