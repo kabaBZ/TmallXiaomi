@@ -43,12 +43,11 @@ def parse(page_text,x):
     #href=\"//detail.tmall.com/item.htm?id=44932380380&rn=ea8fc89d045f285d78fe41708a17beb9&abbucket=5\" ta
     for i in page_text:
         dic['num'] = num+(60*x)
-        dic['title'] = re.findall('.*? >(.*?) </a>                            <div.*?',i)[0] #.split('\"')[1].split('\\')[0]
-        dic['price'] = re.findall('.*?.discntPrice:  (.*?)     -->.*?',i)[0]
-        dic['sales_num'] = re.findall('.*?"sale-num(.*?)</span>.*?',i)[0].split('>')[1]
-        dic['product_url'] = re.findall('.*?href=(.*?)" target=.*?',i)[0].split('//')[1].split('\\')[0]
+        dic['title'] = re.findall('\s>\D+.*?<\/a>',i)[0].split('>')[1].split('<')[0]
+        dic['price'] = re.findall('\d*?.\d\d\s+?--',i)[0].split('     --')[0]
+        dic['sales_num'] = re.findall('>\d+<\/span>|>\d+\D{1}\+<\/span>',i)[0].split('>')[1].split('<')[0]
+        dic['product_url'] = re.findall('detail\.tmall\.com\/item\.htm\?id=.*?abbucket=5',i)[0]
         num += 1
-        print(dic['price'])
         f.write(str(dic['num']) + ' ' + dic['title'] + ' ' + dic['price'] + ' ' + dic['sales_num'] + ' ' + dic['product_url'] + '\n')
         list.append(copy.deepcopy(dic))
     return list
