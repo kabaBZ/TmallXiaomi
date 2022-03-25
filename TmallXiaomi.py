@@ -28,7 +28,7 @@ headers = {
 def parse(page_text,x):
     dic = {}
     list = []
-    num = 1
+    num = int(1)
     #裁剪响应中前半段无效代码每个商品前会出现的标签,可分段进行正则解析，正则在大规模代码中效率低
     page_text = page_text.split('<!--  item')
     page_text.pop(0)
@@ -42,31 +42,45 @@ def parse(page_text,x):
     # class=\"sale-num\">40万+</span>
     #href=\"//detail.tmall.com/item.htm?id=44932380380&rn=ea8fc89d045f285d78fe41708a17beb9&abbucket=5\" ta
     for i in page_text:
-        dic['num'] = num+(60*x)
+        dic['num'] = num+(60*int(x))-60
         dic['title'] = re.findall('\s>\D+.*?<\/a>',i)[0].split('>')[1].split('<')[0]
         dic['price'] = re.findall('\d*?.\d\d\s+?--',i)[0].split('     --')[0]
-        dic['sales_num'] = re.findall('>\d+<\/span>|>\d+\D{1}\+<\/span>',i)[0].split('>')[1].split('<')[0]
+        dic['sales_num'] = re.findall('>\d+\+?<\/span>|>\d+\D{1}\+<\/span>',i)[0].split('>')[1].split('<')[0]
         dic['product_url'] = re.findall('detail\.tmall\.com\/item\.htm\?id=.*?abbucket=5',i)[0]
         num += 1
         f.write(str(dic['num']) + ' ' + dic['title'] + ' ' + dic['price'] + ' ' + dic['sales_num'] + ' ' + dic['product_url'] + '\n')
         list.append(copy.deepcopy(dic))
     return list
-
-x = input('请输入爬取页数:')
-start_time = time.time()
-f = open('data.csv', 'a', encoding='utf-8')
-for i in range(int(x)):
-    params = set_params(i+1)
+z = int(input('单页1或连续2：'))
+if z == 1:
+    z = input('请输入页数：')
+    start_time = time.time()
+    f = open('data.csv', 'a', encoding='utf-8')
+    params = set_params(z)
     page_text = requests.get(url=url, headers=headers, params=params).text
     # 开发中获取一次响应后存下来进行本地的数据解析，以防过度访问被封ip
     # with open('test.html','w',encoding= 'utf-8') as f:
     #     f.write(page_text)
-    # with open('test.html','r',encoding= 'utf-8') as f:
-    #     page_text = f.read()
-    list = parse(page_text,i)
-    i += 1
+    list = parse(page_text, z)
     print(list)
-f.close()
+    f.close()
+else:
+    x = int(input('请输入开始页数:'))
+    y = int(input('请输入结束页数:'))
+    start_time = time.time()
+    f = open('data.csv', 'a', encoding='utf-8')
+    for i in range(x,y+1):
+        params = set_params(i)
+        page_text = requests.get(url=url, headers=headers, params=params).text
+        # 开发中获取一次响应后存下来进行本地的数据解析，以防过度访问被封ip
+        # with open('test.html','w',encoding= 'utf-8') as f:
+        #     f.write(page_text)
+        # with open('test.html','r',encoding= 'utf-8') as f:
+        #     page_text = f.read()
+        list = parse(page_text,i)
+        i += 1
+        print(list)
+    f.close()
 total_time = time.time()-start_time
 print('总用时：',total_time)
 
