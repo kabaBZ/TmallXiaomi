@@ -37,7 +37,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../项目/Taobao.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../BilibiliComment" />
   </component>
   <component name="RunManager" selected="Python.TmallXiaomi">
     <configuration name="1" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
@@ -165,6 +165,7 @@
       <updated>1648129795598</updated>
       <workItem from="1648129796725" duration="30323000" />
       <workItem from="1648213589015" duration="2209000" />
+      <workItem from="1648293918824" duration="24000" />
     </task>
     <servers />
   </component>
